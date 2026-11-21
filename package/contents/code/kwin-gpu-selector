@@ -1,0 +1,126 @@
+#!/bin/bash
+# Helper for the "NVIDIA Optimus KWin GPU Selector" Plasma applet.
+#   status        -> JSON with configured mode, applied mode and current KWin GPU
+#   set <mode>    -> auto | nvidia | integrated | default
+#   logout        -> show KDE's logout dialog
+
+here=$(dirname "$(readlink -f "$0")")
+conf="${XDG_CONFIG_HOME:-$HOME/.config}/kwin-gpu-selector.conf"
+state="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/kwin-gpu-selector.applied"
+env_dir="${XDG_CONFIG_HOME:-$HOME/.config}/plasma-workspace/env"
+env_file="$env_dir/nvidia-optimus-kwin-gpu-selector.sh"
+
+qdbus_bin() {
+    local q
+    for q in qdbus6 qdbus-qt6 qdbus; do
+        command -v "$q" >/dev/null && { echo "$q"; return; }
+    done
+}
+
+json_str() {
+    local s=${1//\\/\\\\}
+    s=${s//\"/\\\"}
+    printf '"%s"' "$s"
+}
+
+normalize() {
+    case "$1" in
+        auto|nvidia|default) echo "$1" ;;
+        integrated|intel|amd) echo integrated ;;
+        *) echo default ;;
+    esac
+}
+
+get_mode() {
+    local m=""
+    [[ -r $conf ]] && m=$(sed -n 's/^MODE=//p' "$conf" | head -n1)
+    normalize "$m"
+}
+
+# Copy (or update) the login script into Plasma's env directory
+install_env() {
+    mkdir -p "$env_dir"
+    cmp -s "$here/env.sh" "$env_file" || cp "$here/env.sh" "$env_file"
+    # Migrate the old script name used during development
+    local old="$env_dir/gpu-principal.sh"
+    [[ -f $old ]] && grep -q kwin-gpu-selector.conf "$old" && rm -f "$old"
+}
+
+detect_cards() {
+    nvidia_card="" igpu_card="" igpu_vendor=""
+    local c drv
+    for c in /sys/class/drm/card[0-9]*; do
+        [[ ${c##*/} == *-* ]] && continue
+        drv=$(basename "$(readlink -f "$c/device/driver")")
+        case "$drv" in
+            nvidia|nouveau) nvidia_card=${c##*/} ;;
+            i915|xe) igpu_card=${c##*/}; igpu_vendor=intel ;;
+            amdgpu) igpu_card=${c##*/}; igpu_vendor=amd ;;
+        esac
+    done
+}
+
+find_icon() {
+    local d t
+    for d in "${XDG_DATA_HOME:-$HOME/.local/share}/icons" /usr/share/icons; do
+        for t in Papirus Papirus-Dark Papirus-Light; do
+            [[ -f $d/$t/64x64/apps/$1.svg ]] && { echo "file://$d/$t/64x64/apps/$1.svg"; return; }
+        done
+    done
+}
+
+status() {
+    [[ -f $env_file ]] && install_env
+    detect_cards
+    local mode applied renderer gpu auto_target=default q
+    mode=$(get_mode)
+    applied=default
+    [[ -r $state ]] && applied=$(normalize "$(<"$state")")
+    q=$(qdbus_bin)
+    [[ -n $q ]] && renderer=$("$q" org.kde.KWin /KWin supportInformation 2>/dev/null \
+        | sed -n 's/^OpenGL renderer string: //p' | head -n1)
+    case "$renderer" in
+        *NVIDIA*|*GeForce*|*Quadro*|*RTX*|*NV[0-9A-F]*) gpu=NVIDIA ;;
+        *Intel*) gpu=Intel ;;
+        *AMD*|*Radeon*) gpu=AMD ;;
+        "") gpu=unknown ;;
+        *) gpu=other ;;
+    esac
+    if [[ -n $nvidia_card ]] && grep -qx connected /sys/class/drm/"$nvidia_card"-*/status 2>/dev/null; then
+        auto_target=nvidia
+    fi
+    printf '{"mode":%s,"applied":%s,"gpu":%s,"renderer":%s,"autoTarget":%s,' \
+        "$(json_str "$mode")" "$(json_str "$applied")" "$(json_str "$gpu")" \
+        "$(json_str "$renderer")" "$(json_str "$auto_target")"
+    printf '"igpuVendor":%s,"hybrid":%s,"wayland":%s,"envInstalled":%s,' \
+        "$(json_str "${igpu_vendor:-intel}")" \
+        "$([[ -n $nvidia_card && -n $igpu_card ]] && echo true || echo false)" \
+        "$([[ $XDG_SESSION_TYPE == wayland || -n $WAYLAND_DISPLAY ]] && echo true || echo false)" \
+        "$([[ -f $env_file ]] && echo true || echo false)"
+    printf '"iconNvidia":%s,"iconIgpu":%s,"pending":%s}\n' \
+        "$(json_str "$(find_icon nvidia)")" "$(json_str "$(find_icon "${igpu_vendor:-intel}")")" \
+        "$([[ $mode != "$applied" ]] && echo true || echo false)"
+}
+
+case "$1" in
+    status) status ;;
+    set)
+        case "$2" in
+            auto|nvidia|integrated|default)
+                mkdir -p "$(dirname "$conf")"
+                printf 'MODE=%s\n' "$2" > "$conf"
+                install_env
+                status
+                ;;
+            *) echo "Invalid mode: $2" >&2; exit 2 ;;
+        esac
+        ;;
+    logout)
+        q=$(qdbus_bin)
+        [[ -n $q ]] && "$q" org.kde.LogoutPrompt /LogoutPrompt promptLogout
+        ;;
+    *)
+        echo "Usage: $0 status | set {auto|nvidia|integrated|default} | logout" >&2
+        exit 2
+        ;;
+esac

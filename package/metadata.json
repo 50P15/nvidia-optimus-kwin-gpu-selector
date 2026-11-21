@@ -1,0 +1,16 @@
+{
+    "KPackageStructure": "Plasma/Applet",
+    "KPlugin": {
+        "Authors": [ { "Name": "sopis" } ],
+        "Category": "System Information",
+        "Description": "Choose the GPU used by KWin on NVIDIA Optimus laptops (Wayland). Changes apply at next login.",
+        "Description[es]": "Elige la GPU que usa KWin en portátiles con NVIDIA Optimus (Wayland). Los cambios se aplican al volver a iniciar sesión.",
+        "Icon": "video-display",
+        "Id": "org.sopis.kwingpuselector",
+        "License": "MIT",
+        "Name": "NVIDIA Optimus KWin GPU Selector",
+        "Version": "1.0.0",
+        "Website": "https://store.kde.org"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0"
+}
