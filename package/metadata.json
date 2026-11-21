@@ -10,7 +10,7 @@
         "License": "MIT",
         "Name": "NVIDIA Optimus KWin GPU Selector",
         "Version": "1.0.0",
-        "Website": "https://store.kde.org"
+        "Website": "https://github.com/50P15/nvidia-optimus-kwin-gpu-selector"
     },
     "X-Plasma-API-Minimum-Version": "6.0"
 }
