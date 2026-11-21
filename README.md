@@ -2,6 +2,8 @@
 
 A KDE Plasma 6 panel applet to choose which GPU **KWin** (the Plasma Wayland compositor) renders the desktop on, on NVIDIA Optimus laptops (Intel or AMD integrated GPU + NVIDIA).
 
+Improves gaming performance and frame pacing when an external display is connected to the dedicated NVIDIA GPU.
+
 It does **not** change which GPU games or apps use, and it never logs you out by itself. Changes apply at the next login.
 
 ## Modes
