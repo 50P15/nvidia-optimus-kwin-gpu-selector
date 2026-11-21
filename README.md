@@ -54,3 +54,9 @@ rm ~/.config/plasma-workspace/env/nvidia-optimus-kwin-gpu-selector.sh ~/.config/
 ## License
 
 MIT. NVIDIA, Intel and AMD logos are not included; they are taken at runtime from the installed icon theme and belong to their respective owners.
+
+## Support
+
+If you find this applet useful, you can support my work on Ko-fi. Thank you!
+
+[![Support me on Ko-fi](https://storage.ko-fi.com/cdn/kofi2.png?v=3)](https://ko-fi.com/sopis)
