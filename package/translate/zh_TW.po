@@ -1,0 +1,87 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: plasma_applet_org.sopis.kwingpuselector\n"
+"Report-Msgid-Bugs-To: https://github.com/50P15/nvidia-optimus-kwin-gpu-selector/issues\n"
+"POT-Creation-Date: 2026-11-22 00:00+0800\n"
+"PO-Revision-Date: 2026-11-22 00:00+0800\n"
+"Last-Translator: KairikiFedora <13278297951@sina.cn>\n"
+"Language-Team: Traditional Chinese\n"
+"Language: zh_TW\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: contents/ui/main.qml:31
+msgid "Automatic (by connected display)"
+msgstr "自動（依連接的顯示器）"
+
+#: contents/ui/main.qml:32
+msgid "Prefer NVIDIA"
+msgstr "優先使用 NVIDIA"
+
+#: contents/ui/main.qml:33
+#, kde-format
+msgid "Prefer %1"
+msgstr "優先使用 %1"
+
+#: contents/ui/main.qml:34
+msgid "KDE default"
+msgstr "KDE 預設"
+
+#: contents/ui/main.qml:87
+#, kde-format
+msgid "KWin on %1"
+msgstr "KWin 使用 %1"
+
+#: contents/ui/main.qml:176
+#, kde-format
+msgid "KWin is using: %1"
+msgstr "KWin 目前正使用：%1"
+
+#: contents/ui/main.qml:185
+#, kde-format
+msgid "Current session: %1"
+msgstr "目前工作階段：%1"
+
+#: contents/ui/main.qml:198
+msgid "Mode for next session:"
+msgstr "下一個工作階段的模式："
+
+#: contents/ui/main.qml:89
+#, kde-format
+msgid "Next session: %1"
+msgstr "下一個工作階段：%1"
+
+#: contents/ui/main.qml:90
+#, kde-format
+msgid "Mode: %1"
+msgstr "模式：%1"
+
+#: contents/ui/main.qml:213
+msgid "Log out to apply the change."
+msgstr "登出以套用變更。"
+
+#: contents/ui/main.qml:89
+msgid "Log out to apply"
+msgstr "登出以套用"
+
+#: contents/ui/main.qml:216
+msgid "Log out…"
+msgstr "登出…"
+
+#: contents/ui/main.qml:193
+msgid "This only works in a Plasma Wayland session."
+msgstr "這僅在 Plasma Wayland 工作階段中有效。"
+
+#: contents/ui/main.qml:193
+msgid "No NVIDIA + Intel/AMD GPU pair found. The selected mode will have no effect."
+msgstr "找不到 NVIDIA + Intel/AMD GPU 配對。所選模式將不會生效。"
+
+#: contents/ui/main.qml:28
+msgid "unknown"
+msgstr "未知"
+
+#: contents/ui/main.qml:28
+msgid "other GPU"
+msgstr "其他 GPU"
