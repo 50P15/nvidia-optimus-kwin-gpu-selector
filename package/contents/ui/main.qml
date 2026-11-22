@@ -24,36 +24,17 @@ PlasmoidItem {
     property string iconNvidia: ""
     property string iconIgpu: ""
 
-    // Translations: English by default, Spanish if the system locale is Spanish
-    readonly property bool es: Qt.locale().name.startsWith("es")
-    readonly property var strings: ({
-        "auto": ["Automatic (by connected display)", "Automático según monitor"],
-        "nvidia": ["Prefer NVIDIA", "Priorizar NVIDIA"],
-        "integrated": ["Prefer %1", "Priorizar %1"],
-        "default": ["KDE default", "Predeterminado de KDE"],
-        "kwinOn": ["KWin on %1", "KWin en %1"],
-        "kwinUsing": ["KWin is using: %1", "KWin está usando: %1"],
-        "current": ["Current session: %1", "Sesión actual: %1"],
-        "next": ["Mode for next session:", "Modo para la próxima sesión:"],
-        "nextTip": ["Next session: %1", "Próxima sesión: %1"],
-        "modeTip": ["Mode: %1", "Modo: %1"],
-        "logoutApply": ["Log out to apply the change.", "Cierra sesión para aplicar el cambio."],
-        "logoutTip": ["Log out to apply", "Cierra sesión para aplicar"],
-        "logout": ["Log out…", "Cerrar sesión…"],
-        "noWayland": ["This only works in a Plasma Wayland session.", "Solo funciona en una sesión Plasma Wayland."],
-        "noHybrid": ["No NVIDIA + Intel/AMD GPU pair found. The selected mode will have no effect.",
-                     "No se ha encontrado una pareja NVIDIA + Intel/AMD. El modo elegido no tendrá efecto."],
-        "unknown": ["unknown", "desconocida"],
-        "other": ["other GPU", "otra GPU"]
-    })
-    function tr(key, arg) {
-        const s = strings[key][es ? 1 : 0]
-        return arg === undefined ? s : s.replace("%1", arg)
-    }
-
     readonly property string igpuName: igpuVendor === "amd" ? "AMD" : "Intel"
-    readonly property string gpuName: gpu === "unknown" || gpu === "other" ? tr(gpu) : gpu
-    function modeName(m) { return m === "integrated" ? tr(m, igpuName) : tr(m) }
+    readonly property string gpuName: gpu === "unknown" ? i18n("unknown") : gpu === "other" ? i18n("other GPU") : gpu
+    function modeName(m) {
+        switch (m) {
+        case "auto": return i18n("Automatic (by connected display)")
+        case "nvidia": return i18n("Prefer NVIDIA")
+        case "integrated": return i18n("Prefer %1", igpuName)
+        case "default": return i18n("KDE default")
+        default: return m
+        }
+    }
 
     readonly property string iconKind: {
         const m = mode === "auto" ? autoTarget : mode
@@ -103,10 +84,10 @@ PlasmoidItem {
 
     Plasmoid.icon: iconKind === "nvidia" ? nvidiaIcon.toString()
         : iconKind === "integrated" ? igpuIcon.toString() : "video-display"
-    toolTipMainText: tr("kwinOn", gpuName)
+    toolTipMainText: i18n("KWin on %1", gpuName)
     toolTipSubText: pending
-        ? tr("nextTip", modeName(mode)) + "\n" + tr("logoutTip")
-        : tr("modeTip", modeName(mode))
+        ? i18n("Next session: %1", modeName(mode)) + "\n" + i18n("Log out to apply")
+        : i18n("Mode: %1", modeName(mode))
     Plasmoid.status: pending ? PlasmaCore.Types.NeedsAttentionStatus : PlasmaCore.Types.ActiveStatus
 
     Plasma5Support.DataSource {
@@ -192,7 +173,7 @@ PlasmoidItem {
 
         PlasmaExtras.Heading {
             level: 3
-            text: root.tr("kwinUsing", root.gpuName)
+            text: i18n("KWin is using: %1", root.gpuName)
         }
         PlasmaComponents.Label {
             Layout.fillWidth: true
@@ -201,7 +182,7 @@ PlasmoidItem {
             elide: Text.ElideRight
         }
         PlasmaComponents.Label {
-            text: root.tr("current", root.modeName(root.applied))
+            text: i18n("Current session: %1", root.modeName(root.applied))
             opacity: 0.7
         }
 
@@ -209,12 +190,12 @@ PlasmoidItem {
             Layout.fillWidth: true
             visible: !root.wayland || !root.hybrid
             type: Kirigami.MessageType.Information
-            text: !root.wayland ? root.tr("noWayland") : root.tr("noHybrid")
+            text: !root.wayland ? i18n("This only works in a Plasma Wayland session.") : i18n("No NVIDIA + Intel/AMD GPU pair found. The selected mode will have no effect.")
         }
 
         Kirigami.Separator { Layout.fillWidth: true }
 
-        PlasmaComponents.Label { text: root.tr("next") }
+        PlasmaComponents.Label { text: i18n("Mode for next session:") }
 
         Repeater {
             model: ["auto", "nvidia", "integrated", "default"]
@@ -229,10 +210,10 @@ PlasmoidItem {
             Layout.fillWidth: true
             visible: root.pending
             type: Kirigami.MessageType.Warning
-            text: root.tr("logoutApply")
+            text: i18n("Log out to apply the change.")
             actions: [
                 Kirigami.Action {
-                    text: root.tr("logout")
+                    text: i18n("Log out…")
                     icon.name: "system-log-out"
                     onTriggered: executable.run(root.helper + " logout")
                 }
